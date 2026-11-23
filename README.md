@@ -2,7 +2,7 @@
 
 Proyecto académico para la asignatura Operaciones de Aprendizaje de Máquina I (MLOps), de la Carrera de Especialización en Inteligencia Artificial. El trabajo parte de un clasificador multiclase de objetos astronómicos SDSS DR17, cuyo modelo seleccionado es XGBoost, y avanza hacia un flujo organizado y reproducible.
 
-> **Estado actual:** implementación local en Python 3.12 con uv, pipeline modular, una corrida reducida registrada en MLflow local y pruebas iniciales de preprocesamiento. No hay repositorio Git inicializado en la carpeta oficial.
+> **Estado actual:** el proyecto cuenta con un entorno local con Python 3.12 y uv, un pipeline modular, una corrida reducida registrada en MLflow y pruebas iniciales de preprocesamiento. El repositorio Git está publicado en GitHub en la rama `main`.
 
 ## Índice
 
@@ -29,29 +29,29 @@ Proyecto académico para la asignatura Operaciones de Aprendizaje de Máquina I 
 21. [Estado del proyecto](#estado-del-proyecto)
 22. [Roadmap](#roadmap)
 23. [Referencias](#referencias)
-24. [Licencia y carácter académico](#licencia-y-caracter-academico)
+24. [Consideraciones finales](#consideraciones-finales)
 
 <a id="presentacion"></a>
 ## 1. Presentación del proyecto
 
-Esta carpeta de proyecto conserva el notebook original del trabajo de Aprendizaje de Máquina y añade una implementación local, modular y reproducible para validar el modelo final. La corrida automatizada actual es una **validación técnica reducida**, no una nueva evaluación completa del trabajo original.
+El proyecto conserva el notebook original del trabajo de Aprendizaje de Máquina y agrega una implementación local y modular para validar el modelo seleccionado. La corrida automatizada actual es una **validación técnica reducida**; no reemplaza la evaluación completa del trabajo original.
 
 <a id="objetivo"></a>
 ## 2. Objetivo y descripción general
 
-El objetivo del TP de MLOps es transformar progresivamente el clasificador en una solución mantenible y preparada para etapas futuras de orquestación y despliegue. En el estado actual se cubren carga, limpieza, ingeniería de variables, split estratificado, entrenamiento de XGBoost, evaluación, serialización y tracking local.
+El TP de MLOps busca organizar el clasificador en un flujo reproducible y mantenible, que pueda ampliarse en etapas posteriores. La implementación actual incluye carga y limpieza de datos, ingeniería de variables, partición estratificada, entrenamiento y evaluación de XGBoost, serialización y seguimiento local con MLflow.
 
 <a id="problema-de-ml"></a>
 ## 3. Problema de Machine Learning
 
-Es una clasificación supervisada multiclase: a partir de mediciones fotométricas y espectroscópicas, asignar cada observación a GALAXY, QSO o STAR. La variable objetivo del dataset es class.
+El problema es de clasificación supervisada multiclase. A partir de mediciones fotométricas y espectroscópicas, el modelo asigna cada observación a una de tres clases: GALAXY, QSO o STAR. La variable objetivo del dataset se llama `class`.
 
 <a id="dataset-sdss-dr17"></a>
 ## 4. Dataset SDSS DR17
 
-El notebook usa el Stellar Classification Dataset — SDSS17 publicado en Kaggle por fedesoriano. El CSV esperado es star_classification.csv; la carga se realiza con KaggleHub, que mantiene su propia caché y descarga el dataset cuando no está disponible localmente.
+El notebook utiliza el conjunto Stellar Classification Dataset — SDSS17, publicado en Kaggle por fedesoriano. El archivo esperado es `star_classification.csv`. La carga se realiza con KaggleHub, que reutiliza su caché y descarga el archivo si todavía no está disponible localmente.
 
-El notebook describe 100.000 observaciones y 18 columnas en el CSV de origen. Tras descartar obj_ID (guardado con pérdida de precisión), la carga obtiene 100.000 filas y 17 columnas. La limpieza quita una fila centinela y rerun_ID, y deja 99.999 filas y 16 columnas. El directorio data/ del proyecto es solo un placeholder: el código actual no copia el dataset a ese directorio.
+El notebook informa 100.000 observaciones y 18 columnas en el CSV de origen. La carga descarta `obj_ID`, almacenado con pérdida de precisión, y conserva 100.000 filas y 17 columnas. Luego se elimina la fila con valores centinela y la columna `rerun_ID`; el conjunto limpio queda con 99.999 filas y 16 columnas. La carpeta `data/` solo conserva su marcador: el código no copia allí el dataset.
 
 <a id="clases"></a>
 ## 5. Clases de clasificación
@@ -62,14 +62,14 @@ El notebook describe 100.000 observaciones y 18 columnas en el CSV de origen. Tr
 | QSO | 1 |
 | STAR | 2 |
 
-La codificación coincide con LabelEncoder del notebook: orden alfabético. La configuración autoritativa está en src/config.py.
+La codificación sigue el orden alfabético que aplica `LabelEncoder` en el notebook. El mapeo usado por el pipeline está definido en `src/config.py`.
 
 <a id="preparacion-y-features"></a>
 ## 6. Preparación de datos y feature engineering
 
-La carga lee obj_ID y spec_obj_ID como texto, descarta obj_ID y conserva el resto de columnas. La limpieza sigue la regla del notebook: elimina una fila si alguna banda u, g, r, i o z contiene -9999 y elimina rerun_ID. La muestra de validación se estratifica por class.
+La carga interpreta `obj_ID` y `spec_obj_ID` como texto, descarta `obj_ID` y conserva las demás columnas. La limpieza aplica la regla del notebook: elimina las filas en las que alguna banda (`u`, `g`, `r`, `i` o `z`) contiene `-9999`, y luego elimina `rerun_ID`. La muestra de validación se estratifica según `class`.
 
-El transformer que acompaña al modelo calcula las variables en el orden que usa A_completo:
+El transformer incluido en el pipeline calcula las variables en el orden definido por `A_completo`:
 
 | Feature | Fórmula |
 |---|---|
@@ -80,12 +80,12 @@ El transformer que acompaña al modelo calcula las variables en el orden que usa
 | i_z | i − z |
 | signed_log_redshift | sign(redshift) × log1p(abs(redshift)) |
 
-El pipeline serializado contiene este transformer. En inferencia recibe las seis columnas crudas u, g, r, i, z y redshift, y aplica las mismas fórmulas antes de XGBoost.
+El pipeline serializado incluye este transformer. Para inferencia recibe las seis columnas originales (`u`, `g`, `r`, `i`, `z` y `redshift`) y aplica las mismas fórmulas antes de pasar los datos a XGBoost.
 
 <a id="modelo-e-hiperparametros"></a>
 ## 7. Modelo XGBoost e hiperparámetros
 
-El trabajo original seleccionó XGBoost optimizado. El pipeline local usa los valores centralizados en src/config.py:
+El trabajo original seleccionó una versión optimizada de XGBoost. El pipeline local toma sus hiperparámetros de `src/config.py`:
 
 | Parámetro | Valor |
 |---|---:|
@@ -101,19 +101,19 @@ El trabajo original seleccionó XGBoost optimizado. El pipeline local usa los va
 | n_jobs | -1 |
 | random_state | 42 |
 
-La corrida local no ejecuta RandomizedSearchCV, GridSearchCV ni validación cruzada.
+La ejecución local no realiza búsquedas con `RandomizedSearchCV` o `GridSearchCV`, ni validación cruzada.
 
 <a id="resultados-de-validacion"></a>
 ## 8. Resultados de validación
 
-Los valores siguientes pertenecen exclusivamente a la corrida técnica reducida registrada en MLflow: muestra estratificada de 5.000 observaciones, con 4.000 para entrenamiento y 1.000 para prueba.
+Los valores siguientes corresponden a la corrida técnica reducida registrada en MLflow. Se utilizó una muestra estratificada de 5.000 observaciones: 4.000 para entrenamiento y 1.000 para prueba.
 
 | Métrica | Resultado de la muestra reducida |
 |---|---:|
 | Accuracy | 0.9830 |
 | F1 macro | 0.980720 |
 
-No son directamente comparables con las métricas de la evaluación original, que se obtuvo mediante su propio flujo y partición. No se ejecutó entrenamiento adicional para preparar este README.
+Estas métricas no se comparan directamente con las de la evaluación original, que utilizó otro flujo y otra partición. La revisión de este README no requirió ejecutar entrenamientos.
 
 
 
@@ -167,7 +167,7 @@ flowchart LR
 <a id="arquitectura-objetivo"></a>
 ## 10. Arquitectura objetivo (propuesta)
 
-Este diagrama describe una **arquitectura futura**, no implementada ni validada en este proyecto. Muestra una dirección posible para orquestar y desplegar el flujo cuando las siguientes etapas sean aprobadas.
+El diagrama muestra una **arquitectura futura** que todavía no está implementada ni validada. Resume una alternativa para orquestar y desplegar el flujo en etapas posteriores.
 
 [Ver diagrama SVG de arquitectura propuesta](docs/diagrams/architecture-proposed.svg) · [Fuente Mermaid](docs/diagrams/architecture-proposed.mmd)
 
@@ -193,7 +193,7 @@ flowchart LR
 <a id="estructura-del-proyecto"></a>
 ## 11. Estructura del proyecto
 
-Estructura observada y documentación añadida en esta entrega:
+La estructura actual incluye los siguientes componentes:
 
 ```text
 Tp_Mlops/
@@ -242,7 +242,7 @@ Tp_Mlops/
 | pytest | Pruebas iniciales |
 | Jupyter / ipykernel | Notebook original y kernel local |
 
-LightGBM y otras bibliotecas también están declaradas porque el notebook original las importa o las compara; el pipeline modular actual entrena únicamente XGBoost. MLflow se configuró con SQLite local y almacenamiento de artefactos en el sistema de archivos. No es una instalación distribuida.
+LightGBM y otras bibliotecas están declaradas porque el notebook original las importa o compara; el pipeline modular entrena solo XGBoost. MLflow usa SQLite local y guarda los artefactos en el sistema de archivos. Esta configuración no es distribuida.
 
 <a id="requisitos"></a>
 ## 13. Requisitos previos
@@ -250,7 +250,7 @@ LightGBM y otras bibliotecas también están declaradas porque el notebook origi
 - Windows 10/11 de 64 bits.
 - Python 3.12.
 - uv instalado y accesible desde PowerShell.
-- Conexión/credenciales KaggleHub si el dataset todavía no está en su caché.
+- Conexión a internet y, si KaggleHub lo requiere y el dataset no está en caché, credenciales de Kaggle configuradas localmente.
 - Espacio local para el entorno virtual, la base SQLite y los artefactos.
 
 <a id="instalacion-con-uv"></a>
@@ -263,7 +263,7 @@ Set-Location "C:\Users\Duvan Orozco\Desktop\DUVAN\UBA\ESPECIALIZACION INTELIGENC
 uv sync
 ```
 
-El proyecto requiere Python 3.12 y uv crea o sincroniza **.venv** a partir de **pyproject.toml** y **uv.lock**. Para activar el entorno en PowerShell:
+El proyecto requiere Python 3.12. `uv sync` crea o actualiza `.venv` usando `pyproject.toml` y `uv.lock`. En PowerShell, el entorno se activa así:
 
 ```powershell
 .\.venv\Scripts\Activate.ps1
@@ -278,7 +278,7 @@ El pipeline de validación reducida se ejecuta desde la raíz:
 uv run python -m src.validate_model
 ```
 
-Por defecto usa una muestra estratificada de 5.000 filas y entrena el XGBoost configurado (587 árboles). El tiempo depende del hardware. Esta ejecución **vuelve a entrenar** y escribe un nuevo run y artefactos; no la ejecutes solo para consultar los resultados existentes.
+Por defecto, toma una muestra estratificada de 5.000 filas y entrena XGBoost con 587 árboles. La duración depende del equipo. Cada ejecución **vuelve a entrenar** y crea un nuevo run y nuevos artefactos; no es necesario ejecutarla para consultar los resultados existentes.
 
 Para una prueba técnica menor, el CLI acepta otro tamaño:
 
@@ -286,18 +286,18 @@ Para una prueba técnica menor, el CLI acepta otro tamaño:
 uv run python -m src.validate_model --sample-size 300
 ```
 
-KaggleHub reutiliza la caché del usuario y descarga el dataset si hace falta. El código actual no ofrece un modo de solo inferencia por CLI.
+KaggleHub reutiliza la caché local y descarga el dataset si es necesario. El código no ofrece actualmente un modo de inferencia por línea de comandos.
 
 <a id="pruebas"></a>
 ## 16. Ejecución de pruebas
 
-La última comprobación registrada ejecutó únicamente:
+La última comprobación documentada ejecutó solo estas pruebas:
 
 ```powershell
 uv run pytest tests/test_preprocessing.py -q
 ```
 
-Resultado: **5 passed in 0.20s**. Estas pruebas cubren limpieza, fórmulas, orden de features, mapeo de clases y muestreo estratificado, sin descargar Kaggle ni entrenar modelos.
+Resultado: **5 passed in 0.20s**. Las pruebas cubren limpieza, fórmulas, orden de features, mapeo de clases y muestreo estratificado. No descargan datos ni entrenan modelos.
 
 **Cobertura pendiente:** no hay un archivo de pruebas independiente para bundle/serialización/carga/predicción. **conftest.py** define una fixture de XGBoost sintético de tres árboles, pero las pruebas actuales de preprocesamiento no la solicitan. No se generó un informe porcentual de cobertura. La suite completa no se volvió a ejecutar para preparar esta documentación.
 
@@ -305,9 +305,9 @@ Resultado: **5 passed in 0.20s**. Estas pruebas cubren limpieza, fórmulas, orde
 <a id="serializacion-e-inferencia"></a>
 ## 17. Serialización e inferencia
 
-Los bundles modulares se guardan con nombres basados en el run ID bajo models/. Incluyen el pipeline sklearn, el clasificador, el orden de features, el mapeo de clases, hiperparámetros, transformaciones y metadatos de la corrida.
+Los bundles modulares se guardan en `models/` con nombres basados en el ID del run. Incluyen el pipeline de scikit-learn, el clasificador, el orden de las features, el mapeo de clases, los hiperparámetros, las transformaciones y los metadatos de ejecución.
 
-La interfaz predict_records espera observaciones crudas con columnas u, g, r, i, z y redshift. El transformer incluido en el bundle calcula las features. Ejemplo usando el bundle actualmente registrado:
+La función `predict_records` recibe observaciones originales con las columnas `u`, `g`, `r`, `i`, `z` y `redshift`. El transformer del bundle calcula las features. Este ejemplo usa el bundle de la corrida registrada:
 
 ```python
 from pathlib import Path
@@ -324,38 +324,38 @@ predicciones = predict_records(observaciones, bundle)
 print(predicciones)
 ```
 
-**Compatibilidad de artefactos:** el archivo histórico models/xgboost_validation.joblib contiene un XGBClassifier directo y no incluye el transformer como bundle. predict_records espera el formato bundle modular; el artefacto histórico no es intercambiable directamente. Ambos formatos se conservan y no se sobrescriben.
+**Compatibilidad de artefactos:** el archivo histórico `models/xgboost_validation.joblib` contiene un `XGBClassifier` directo y no incluye el transformer. `predict_records` espera el bundle modular, por lo que ambos formatos no son intercambiables. Se conservan por separado.
 
 <a id="mlflow-tracking"></a>
 ## 18. Integración con MLflow
 
-El pipeline configura MLflow Tracking local. La corrida existente corresponde al experimento **sdss17-xgboost-validation**, run ID **aa56fc6e192642ef9160c29a23cd81b7**, con estado **FINISHED**. Registra parámetros, semilla, tamaño de muestra, features, mapeo, métricas, matriz de confusión y archivos del run.
+El pipeline registra los experimentos en MLflow local. La corrida existente pertenece al experimento **sdss17-xgboost-validation**; su ID es **aa56fc6e192642ef9160c29a23cd81b7** y su estado es **FINISHED**. El run contiene parámetros, semilla, tamaño de muestra, features, mapeo, métricas, matriz de confusión y archivos asociados.
 
 - Backend: SQLite local en mlflow.db.
 - Almacenamiento de artefactos: mlartifacts/.
 - URI definido por el código: SQLite en la raíz del proyecto.
 - No se utiliza infraestructura remota ni servicio de base de datos externo.
 
-Para consultar la interfaz desde PowerShell, en la raíz del proyecto:
+Para abrir la interfaz de MLflow, ejecuta desde PowerShell en la raíz del proyecto:
 
 ```powershell
 uv run mlflow ui --backend-store-uri "sqlite:///mlflow.db" --host 127.0.0.1 --port 5000
 ```
 
-Abrir http://127.0.0.1:5000. El comando inicia la UI local; debe permanecer ejecutándose en esa terminal mientras se consulta. El run descrito arriba fue consultado en el almacén existente; este README no creó una corrida nueva.
+Luego abre http://127.0.0.1:5000 en el navegador. La terminal debe permanecer abierta mientras se utiliza la interfaz. El run descrito se consultó en el almacén existente; esta revisión no creó una corrida nueva.
 
 <a id="experimentos-y-artefactos"></a>
 ## 19. Organización de experimentos y artefactos
 
-Cada invocación del pipeline abre un run nuevo y usa su identificador para nombrar bundle, metadatos y resultados:
+Cada ejecución del pipeline crea un run y utiliza su ID para nombrar el bundle, los metadatos y los resultados:
 
-- models/xgboost_<run_id>.joblib: bundle modular para inferencia.
-- models/xgboost_<run_id>_metadata.json: schema, mapping, transformaciones, parámetros y metadatos.
-- outputs/validation_<run_id>.json: métricas, reporte por clase y matriz de confusión.
-- mlflow.db: metadatos locales de experimentos.
-- mlartifacts/<run_id>/: archivos adjuntos al run.
+- `models/xgboost_<run_id>.joblib`: bundle modular para inferencia.
+- `models/xgboost_<run_id>_metadata.json`: esquema, mapeo, transformaciones, parámetros y metadatos.
+- `outputs/validation_<run_id>.json`: métricas, reporte por clase y matriz de confusión.
+- `mlflow.db`: metadatos locales de los experimentos.
+- `mlartifacts/<run_id>/`: archivos adjuntos al run.
 
-Los artefactos históricos models/xgboost_validation.joblib y outputs/validation_results.json pertenecen a una corrida anterior y usan el formato directo XGBoost. .gitignore excluye models/** y outputs/** excepto .gitkeep; por ello, dichos binarios/JSON no se agregan automáticamente a Git. También excluye mlflow.db y mlartifacts/.
+Los artefactos históricos `models/xgboost_validation.joblib` y `outputs/validation_results.json` pertenecen a una corrida anterior y usan el formato directo de XGBoost. `.gitignore` excluye `models/**` y `outputs/**`, salvo los archivos `.gitkeep`; por eso, los modelos y resultados no se agregan al repositorio. También se excluyen `mlflow.db`, `mlartifacts/` y `mlruns/`.
 
 <a id="limitaciones"></a>
 ## 20. Limitaciones actuales
@@ -365,9 +365,9 @@ Los artefactos históricos models/xgboost_validation.joblib y outputs/validation
 - Las pruebas actuales se concentran en preprocessing; falta cobertura automatizada separada de serialización y predicción.
 - Hay dos formatos de artefacto; predict_records admite el bundle modular.
 - SQLite y mlartifacts son locales a esta máquina; no constituyen tracking distribuido.
-- models/** y outputs/** están ignorados por Git, y mlruns/ no aparece en las reglas actuales de .gitignore.
-- La carpeta oficial no contiene .git; no hay historial de commits ni publicación confirmada.
-- No se declara una licencia de software en este proyecto.
+- `models/**` y `outputs/**` están ignorados por Git, salvo sus archivos `.gitkeep`. También se excluyen `mlflow.db`, `mlartifacts/` y `mlruns/`.
+- El repositorio local está publicado en GitHub en la rama `main`. Los artefactos generados y los datos descargados se mantienen fuera del repositorio.
+- El repositorio no declara una licencia de software.
 - El dataset requiere respetar las condiciones de distribución de su fuente.
 
 <a id="estado-del-proyecto"></a>
@@ -382,10 +382,10 @@ Los artefactos históricos models/xgboost_validation.joblib y outputs/validation
 | Artefacto modular y tracking | Guardados y consultables localmente |
 | Pruebas de preprocesamiento | 5 aprobadas en la última ejecución auditada |
 | Pruebas de serialización/inferencia | No implementadas como pruebas independientes |
-| Repositorio Git | No inicializado en la carpeta oficial |
+| Repositorio Git | Inicializado y publicado en GitHub, rama `main` |
 | Airflow, Docker Compose, PostgreSQL, MinIO, FastAPI | No implementados |
 
-La carpeta no es actualmente un repositorio Git. No se afirma publicación en GitHub ni historial de commits. Para el primer commit se espera incluir código, README, diagramas, notebook, pyproject.toml y uv.lock; revisar si se adjuntan modelo y resultados, dado que .gitignore los excluye. El entorno, cachés, base MLflow y artefactos locales suelen mantenerse fuera del repositorio salvo requisito expreso de entrega.
+El repositorio está publicado en GitHub. El primer avance incluye código, documentación, diagramas, notebook, `pyproject.toml` y `uv.lock`. Los modelos, resultados, el entorno virtual, las cachés y el almacén local de MLflow permanecen excluidos mediante `.gitignore`.
 
 <a id="roadmap"></a>
 ## 22. Roadmap
@@ -393,7 +393,7 @@ La carpeta no es actualmente un repositorio Git. No se afirma publicación en Gi
 | Etapa | Alcance | Estado |
 |---|---|---|
 | **1 — Implementación local** | Entorno, organización, modularización, pipeline, evaluación/serialización, MLflow local y pruebas iniciales | Implementada localmente; pruebas de preprocesamiento, cobertura de inferencia pendiente |
-| **2 — Consolidación del primer avance** | README, organización Git, política de artefactos, pruebas de serialización e inferencia | En curso; Git y pruebas pendientes |
+| **2 — Consolidación del primer avance** | Documentación, organización Git y política de artefactos; pruebas de serialización e inferencia | Publicado en GitHub; las pruebas específicas de serialización e inferencia siguen pendientes |
 | **3 — Orquestación** | Airflow, DAG y ejecución del pipeline desde el orquestador | Pendiente |
 | **4 — Infraestructura** | Docker, Docker Compose, PostgreSQL, MinIO e integración de MLflow | Pendiente |
 | **5 — Servicio de inferencia** | FastAPI, contrato request/response, endpoint y carga del bundle | Pendiente |
@@ -410,10 +410,10 @@ Las etapas 3 a 6 son propuestas de trabajo futuro, no capacidades disponibles en
 4. [MLflow Tracking documentation](https://mlflow.org/docs/latest/tracking/).
 5. Notebook de referencia: notebooks/AdMq1_TP_Final_Marroquin_Orozco_VF.ipynb (se conserva sin modificaciones).
 
-<a id="licencia-y-caracter-academico"></a>
-## 24. Licencia y carácter académico
+<a id="consideraciones-finales"></a>
+## 24. Consideraciones finales
 
-Este material se desarrolla con fines académicos para la Carrera de Especialización en Inteligencia Artificial. No se encontró un archivo LICENSE en el estado auditado; por tanto, no se declara una licencia de software para el código. La licencia y atribución del dataset deben verificarse en la fuente antes de redistribuirlo.
+Este proyecto fue desarrollado con fines académicos para la asignatura Operaciones de Aprendizaje de Máquina I. El trabajo utiliza el dataset SDSS17 publicado en Kaggle. Su uso y atribución deben ajustarse a las condiciones establecidas por la fuente original.
 
 
 
