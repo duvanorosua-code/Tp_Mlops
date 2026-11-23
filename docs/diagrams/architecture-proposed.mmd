@@ -1,0 +1,17 @@
+flowchart LR
+    subgraph COMPOSE[Propuesta: servicios coordinados por Docker Compose]
+        AIRFLOW[Airflow<br/>DAG]
+        TRAIN[Pipeline de entrenamiento]
+        MLFLOW[MLflow Tracking]
+        PG[(PostgreSQL<br/>metadatos)]
+        MINIO[(MinIO<br/>artefactos)]
+        API[FastAPI<br/>predicción]
+        AIRFLOW --> TRAIN
+        TRAIN --> MLFLOW
+        MLFLOW --> PG
+        MLFLOW --> MINIO
+        MINIO --> API
+    end
+    CLIENT[Cliente] --> API
+    API --> RESPONSE[Predicción]
+

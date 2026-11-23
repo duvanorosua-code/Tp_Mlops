@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="720" viewBox="0 0 1600 720" role="img" aria-labelledby="title desc">
+<title id="title">Arquitectura actual del proyecto</title>
+<desc id="desc">Flujo local SDSS DR17 a XGBoost, evaluación, artefactos, inferencia y MLflow.</desc>
+<defs>
+  <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#52677a"/></marker>
+  <marker id="arrowTeal" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#087e8b"/></marker>
+  <style>
+    .bg{fill:#f5f8fb}.title{font:700 28px Segoe UI,Arial;fill:#17324d}.sub{font:15px Segoe UI,Arial;fill:#52677a}
+    .box{fill:#fff;stroke:#7890a5;stroke-width:2;rx:14}.main{fill:#eaf4f7;stroke:#087e8b;stroke-width:2.5;rx:14}
+    .store{fill:#eef2f7;stroke:#8797a8;stroke-width:2;rx:14}.t{font:700 16px Segoe UI,Arial;fill:#17324d;text-anchor:middle}
+    .d{font:13px Segoe UI,Arial;fill:#52677a;text-anchor:middle}.line{fill:none;stroke:#52677a;stroke-width:2.3;marker-end:url(#arrow)}
+    .track{fill:none;stroke:#087e8b;stroke-width:2.4;stroke-dasharray:7 6;marker-end:url(#arrowTeal)}
+    .tag{font:12px Segoe UI,Arial;fill:#087e8b}
+  </style>
+</defs>
+<rect class="bg" width="1600" height="720"/>
+<text class="title" x="42" y="46">Tp_Mlops · arquitectura actual</text>
+<text class="sub" x="42" y="74">Implementación local verificada · validación técnica reducida · componentes de tracking locales</text>
+
+<rect class="box" x="35" y="125" width="190" height="108"/>
+<text class="t" x="130" y="165"><tspan x="130">Dataset</tspan><tspan x="130" dy="22">SDSS DR17</tspan></text>
+<text class="d" x="130" y="213">CSV de Kaggle</text>
+
+<rect class="box" x="255" y="125" width="190" height="108"/>
+<text class="t" x="350" y="165"><tspan x="350">Carga de datos</tspan></text>
+<text class="d" x="350" y="193"><tspan x="350">KaggleHub cache</tspan><tspan x="350" dy="18">load_data</tspan></text>
+
+<rect class="box" x="475" y="125" width="190" height="108"/>
+<text class="t" x="570" y="165"><tspan x="570">Limpieza</tspan></text>
+<text class="d" x="570" y="193"><tspan x="570">descarta -9999</tspan><tspan x="570" dy="18">y rerun_ID</tspan></text>
+
+<rect class="box" x="695" y="125" width="190" height="108"/>
+<text class="t" x="790" y="165"><tspan x="790">Muestra y split</tspan></text>
+<text class="d" x="790" y="193"><tspan x="790">5.000 estratificados</tspan><tspan x="790" dy="18">80% train / 20% test</tspan></text>
+
+<rect class="main" x="915" y="125" width="190" height="108"/>
+<text class="t" x="1010" y="158"><tspan x="1010">Pipeline sklearn</tspan></text>
+<text class="d" x="1010" y="185"><tspan x="1010">transformer astronómico</tspan><tspan x="1010" dy="18">+ XGBoost</tspan></text>
+
+<rect class="box" x="1135" y="125" width="190" height="108"/>
+<text class="t" x="1230" y="165"><tspan x="1230">Evaluación</tspan></text>
+<text class="d" x="1230" y="193"><tspan x="1230">Accuracy, F1 macro</tspan><tspan x="1230" dy="18">y matriz de confusión</tspan></text>
+
+<path class="line" d="M225 179 H250"/><path class="line" d="M445 179 H470"/><path class="line" d="M665 179 H690"/><path class="line" d="M885 179 H910"/><path class="line" d="M1105 179 H1130"/>
+
+<rect class="main" x="915" y="340" width="190" height="94"/>
+<text class="t" x="1010" y="376"><tspan x="1010">Bundle joblib</tspan></text>
+<text class="d" x="1010" y="404"><tspan x="1010">pipeline + schema</tspan><tspan x="1010" dy="17">+ metadatos</tspan></text>
+<path class="line" d="M1010 233 V335"/>
+
+<rect class="box" x="1140" y="340" width="190" height="94"/>
+<text class="t" x="1235" y="376"><tspan x="1235">Resultados</tspan></text>
+<text class="d" x="1235" y="405">outputs/*.json</text>
+<path class="line" d="M1230 233 V335"/>
+
+<rect class="main" x="915" y="520" width="190" height="94"/>
+<text class="t" x="1010" y="556"><tspan x="1010">predict_records</tspan></text>
+<text class="d" x="1010" y="585">observaciones nuevas</text>
+<path class="line" d="M1010 434 V515"/>
+
+<rect class="box" x="1140" y="520" width="190" height="94"/>
+<text class="t" x="1235" y="556"><tspan x="1235">Clase predicha</tspan></text>
+<text class="d" x="1235" y="585">GALAXY · QSO · STAR</text>
+<path class="line" d="M1105 567 H1135"/>
+
+<rect class="main" x="480" y="370" width="230" height="108"/>
+<text class="t" x="595" y="407"><tspan x="595">MLflow Tracking</tspan></text>
+<text class="d" x="595" y="436"><tspan x="595">un run local por ejecución</tspan><tspan x="595" dy="18">parámetros, métricas, archivos</tspan></text>
+<path class="track" d="M980 233 C900 300 790 360 715 410"/>
+<path class="track" d="M1135 208 C980 300 820 370 715 425"/>
+
+<rect class="store" x="250" y="555" width="190" height="86"/>
+<text class="t" x="345" y="590"><tspan x="345">SQLite</tspan></text>
+<text class="d" x="345" y="617">mlflow.db</text>
+<path class="track" d="M500 478 C460 515 405 535 375 550"/>
+
+<rect class="store" x="480" y="555" width="230" height="86"/>
+<text class="t" x="595" y="590"><tspan x="595">Almacén local</tspan></text>
+<text class="d" x="595" y="617">mlartifacts/</text>
+<path class="track" d="M595 478 V550"/>
+<text class="tag" x="42" y="684">La arquitectura actual es local; Airflow, Docker Compose, PostgreSQL, MinIO y FastAPI no están implementados.</text>
+</svg>

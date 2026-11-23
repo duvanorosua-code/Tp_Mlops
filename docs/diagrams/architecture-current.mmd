@@ -1,0 +1,16 @@
+flowchart LR
+    SDSS[(CSV SDSS DR17)] --> KH[KaggleHub cache]
+    KH --> LOAD[load_data]
+    LOAD --> CLEAN[clean_data<br/>-9999 y rerun_ID]
+    CLEAN --> SPLIT[prepare_sample<br/>estratifica 5000<br/>split 80/20]
+    SPLIT --> FE[AstronomyFeatureTransformer<br/>colores y signed_log_redshift]
+    FE --> XGB[XGBoost<br/>587 árboles]
+    XGB --> EVAL[evaluate_model<br/>holdout]
+    XGB --> BUNDLE[Bundle joblib<br/>pipeline y metadatos]
+    EVAL --> JSON[Resultados JSON]
+    BUNDLE --> PRED[predict_records<br/>nuevas observaciones]
+    PRED --> CLASS[Clase predicha]
+    XGB -. parámetros y artefacto .-> MLFLOW[MLflow Tracking local]
+    EVAL -. métricas y matriz .-> MLFLOW
+    MLFLOW --> DB[(SQLite<br/>mlflow.db)]
+    MLFLOW --> ART[(Artefactos<br/>mlartifacts/)]

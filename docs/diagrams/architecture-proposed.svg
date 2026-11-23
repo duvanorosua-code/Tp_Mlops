@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="720" viewBox="0 0 1500 720" role="img" aria-labelledby="title desc">
+<title id="title">Arquitectura objetivo propuesta para Tp_Mlops</title>
+<desc id="desc">Diseño futuro con Airflow, MLflow, PostgreSQL, MinIO, FastAPI y Docker Compose.</desc>
+<defs>
+ <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0 0 L0 6 L9 3z" fill="#52677a"/></marker>
+ <style>
+ .bg{fill:#f5f8fb}.title{font:700 28px Segoe UI,Arial;fill:#17324d}.sub{font:15px Segoe UI,Arial;fill:#52677a}
+ .frame{fill:#fff;stroke:#b77700;stroke-width:2.5;stroke-dasharray:10 7;rx:20}
+ .box{fill:#eef4f8;stroke:#68849b;stroke-width:2;rx:14}.store{fill:#f1effa;stroke:#7664a8;stroke-width:2;rx:14}
+ .api{fill:#e8f5ef;stroke:#37805b;stroke-width:2;rx:14}.t{font:700 17px Segoe UI,Arial;fill:#17324d;text-anchor:middle}
+ .d{font:13px Segoe UI,Arial;fill:#52677a;text-anchor:middle}.line{fill:none;stroke:#52677a;stroke-width:2.4;marker-end:url(#arrow)}
+ .note{font:700 14px Segoe UI,Arial;fill:#9b6500}
+ </style>
+</defs>
+<rect class="bg" width="1500" height="720"/>
+<text class="title" x="42" y="48">Arquitectura objetivo · propuesta</text>
+<text class="sub" x="42" y="76">Diseño futuro para integración y despliegue; ninguno de estos servicios está implementado actualmente.</text>
+
+<rect class="frame" x="42" y="126" width="1416" height="500"/>
+<text class="note" x="72" y="158">CONTENEDORES PROPUESTOS: Docker Compose</text>
+
+<rect class="box" x="85" y="230" width="200" height="112"/>
+<text class="t" x="185" y="270">Airflow</text>
+<text class="d" x="185" y="299"><tspan x="185">Scheduler / UI</tspan><tspan x="185" dy="18">DAG de entrenamiento</tspan></text>
+
+<rect class="box" x="360" y="230" width="220" height="112"/>
+<text class="t" x="470" y="270">Pipeline MLOps</text>
+<text class="d" x="470" y="299"><tspan x="470">carga · train · eval</tspan><tspan x="470" dy="18">artefacto reproducible</tspan></text>
+
+<rect class="box" x="660" y="230" width="210" height="112"/>
+<text class="t" x="765" y="270">MLflow Tracking</text>
+<text class="d" x="765" y="299"><tspan x="765">runs y parámetros</tspan><tspan x="765" dy="18">API / interfaz</tspan></text>
+
+<rect class="store" x="960" y="195" width="205" height="105"/>
+<text class="t" x="1062" y="235">PostgreSQL</text>
+<text class="d" x="1062" y="265">metadatos del tracking</text>
+
+<rect class="store" x="960" y="375" width="205" height="105"/>
+<text class="t" x="1062" y="415">MinIO</text>
+<text class="d" x="1062" y="445">artefactos de modelos</text>
+
+<rect class="api" x="1240" y="285" width="180" height="112"/>
+<text class="t" x="1330" y="326">FastAPI</text>
+<text class="d" x="1330" y="355"><tspan x="1330">contrato HTTP</tspan><tspan x="1330" dy="18">predicción</tspan></text>
+
+<path class="line" d="M285 286 H355"/>
+<path class="line" d="M580 286 H655"/>
+<path class="line" d="M870 265 C905 250 920 245 955 245"/>
+<path class="line" d="M870 310 C905 350 920 405 955 420"/>
+<path class="line" d="M1165 427 C1205 420 1220 390 1240 360"/>
+
+
+
+<text class="sub" x="80" y="550">Flujo propuesto: Airflow dispara el pipeline; MLflow guarda metadatos en PostgreSQL y modelos en MinIO;</text>
+<text class="sub" x="80" y="575">FastAPI recupera el bundle publicado desde MinIO. La integración y sus contratos quedan para etapas futuras.</text>
+<rect class="api" x="1240" y="650" width="180" height="48"/>
+<text class="t" x="1330" y="680">Cliente</text>
+<path class="line" d="M1330 650 V402"/></svg>
+
+

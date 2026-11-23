@@ -1,0 +1,14 @@
+flowchart LR
+    A[Carga KaggleHub] --> B[Limpieza]
+    B --> C[Muestra estratificada]
+    C --> D[Split 80/20]
+    D --> E[Features dentro del pipeline]
+    E --> F[Entrenar XGBoost]
+    F --> G[Evaluar holdout]
+    F --> H[Serializar bundle]
+    G --> I[Guardar resultados]
+    F --> J[Registrar parámetros]
+    G --> J
+    H --> K[MLflow y artefactos locales]
+    I --> K
+    J --> K

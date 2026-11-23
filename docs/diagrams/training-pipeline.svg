@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="340" viewBox="0 0 1600 340" role="img" aria-labelledby="title desc">
+<title id="title">Pipeline de entrenamiento de validación reducida</title>
+<desc id="desc">Ocho etapas desde KaggleHub hasta artefactos y registro MLflow.</desc>
+<defs>
+ <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0 0 L0 6 L9 3z" fill="#52677a"/></marker>
+ <style>
+ .bg{fill:#f5f8fb}.title{font:700 27px Segoe UI,Arial;fill:#17324d}.sub{font:14px Segoe UI,Arial;fill:#52677a}
+ .box{fill:#fff;stroke:#68849b;stroke-width:2;rx:14}.special{fill:#e8f4f5;stroke:#087e8b;stroke-width:2.4;rx:14}
+ .t{font:700 15px Segoe UI,Arial;fill:#17324d;text-anchor:middle}.d{font:12px Segoe UI,Arial;fill:#52677a;text-anchor:middle}
+ .line{fill:none;stroke:#52677a;stroke-width:2.2;marker-end:url(#arrow)}
+ </style>
+</defs>
+<rect class="bg" width="1600" height="340"/>
+<text class="title" x="38" y="48">Pipeline de entrenamiento · validación reducida</text>
+<text class="sub" x="38" y="73">Muestra estratificada de 5.000 observaciones · split 80/20 · XGBoost original · sin búsquedas ni CV</text>
+<rect class="box" x="25" y="125" width="170" height="112"/>
+<text class="t" x="110" y="164">1 · Carga</text><text class="d" x="110" y="193"><tspan x="110">KaggleHub</tspan><tspan x="110" dy="17">caché del CSV</tspan></text>
+<rect class="box" x="220" y="125" width="170" height="112"/>
+<text class="t" x="305" y="164">2 · Limpieza</text><text class="d" x="305" y="193"><tspan x="305">-9999 y rerun_ID</tspan><tspan x="305" dy="17">obj_ID descartado</tspan></text>
+<rect class="box" x="415" y="125" width="170" height="112"/>
+<text class="t" x="500" y="164">3 · Split</text><text class="d" x="500" y="193"><tspan x="500">5.000 estratificados</tspan><tspan x="500" dy="17">4.000 train · 1.000 test</tspan></text>
+<rect class="box" x="610" y="125" width="170" height="112"/>
+<text class="t" x="695" y="164">4 · Features</text><text class="d" x="695" y="193"><tspan x="695">colores y</tspan><tspan x="695" dy="17">signed_log_redshift</tspan></text>
+<rect class="special" x="805" y="125" width="170" height="112"/>
+<text class="t" x="890" y="164">5 · Entrenar</text><text class="d" x="890" y="193"><tspan x="890">solo XGBoost</tspan><tspan x="890" dy="17">587 árboles</tspan></text>
+<rect class="box" x="1000" y="125" width="170" height="112"/>
+<text class="t" x="1085" y="164">6 · Evaluar</text><text class="d" x="1085" y="193"><tspan x="1085">holdout: F1, accuracy</tspan><tspan x="1085" dy="17">reporte y confusión</tspan></text>
+<rect class="box" x="1195" y="125" width="170" height="112"/>
+<text class="t" x="1280" y="164">7 · Serializar</text><text class="d" x="1280" y="193"><tspan x="1280">bundle joblib</tspan><tspan x="1280" dy="17">+ metadatos JSON</tspan></text>
+<rect class="special" x="1390" y="125" width="185" height="112"/>
+<text class="t" x="1482" y="164">8 · Registrar</text><text class="d" x="1482" y="193"><tspan x="1482">MLflow + archivos</tspan><tspan x="1482" dy="17">SQLite local</tspan></text>
+<path class="line" d="M195 181 H215"/><path class="line" d="M390 181 H410"/><path class="line" d="M585 181 H605"/><path class="line" d="M780 181 H800"/><path class="line" d="M975 181 H995"/><path class="line" d="M1170 181 H1190"/><path class="line" d="M1365 181 H1385"/>
+<text class="sub" x="38" y="285">El conjunto de prueba se reserva para evaluación. Las métricas corresponden a validación técnica y no al resultado completo del notebook.</text>
+</svg>
